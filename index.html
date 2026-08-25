@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RepairDesk — Inbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ================= MAIN ================= -->
+    <div class="main">
+
+      <header class="topbar">
+        <div class="topbar-brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="topbar-title">RepairDesk</h1>
+            <p class="topbar-sub">Incoming repair requests from Gmail</p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="pill" id="conn-pill" data-state="idle">
+            <span class="pill-dot"></span>
+            <span id="conn-label">Not connected</span>
+          </div>
+          <button class="icon-btn" id="btn-refresh" title="Reload requests" aria-label="Reload requests">
+            <svg viewBox="0 0 24 24" class="ico"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          </button>
+          <button class="btn btn-primary" id="btn-sync">
+            <svg viewBox="0 0 24 24" class="ico"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            <span id="sync-label">Connect Gmail</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="panels">
+
+        <!-- ---------- COLUMN 1: INBOX LIST ---------- -->
+        <section class="panel panel-inbox">
+          <div class="panel-head">
+            <h2 class="panel-title"><span id="inbox-count">0</span> Incoming Requests</h2>
+            <button class="icon-btn sm" id="btn-filter" title="Show urgent only" aria-label="Show urgent only">
+              <svg viewBox="0 0 24 24" class="ico"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>
+            </button>
+          </div>
+          <div class="inbox-list" id="inbox-list"><!-- renderInbox() --></div>
+        </section>
+
+        <!-- ---------- COLUMN 2: DETAIL ---------- -->
+        <section class="panel panel-detail" id="detail"><!-- renderDetail() --></section>
+
+        <!-- ---------- COLUMN 3: SCHEDULE + LOCATION ---------- -->
+        <section class="panel panel-right">
+
+          <div class="card card-schedule">
+            <h2 class="card-title">Schedule Repair</h2>
+
+            <div class="cal">
+              <div class="cal-toolbar">
+                <button class="icon-btn sm" id="btn-prev-week" aria-label="Previous week">
+                  <svg viewBox="0 0 24 24" class="ico"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span class="cal-range" id="cal-range">—</span>
+                <button class="icon-btn sm" id="btn-next-week" aria-label="Next week">
+                  <svg viewBox="0 0 24 24" class="ico"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+                <button class="btn btn-ghost sm" id="btn-today">Today</button>
+              </div>
+
+              <div class="cal-head" id="cal-head"><!-- renderCalendar() --></div>
+              <div class="cal-scroll">
+                <div class="cal-grid" id="cal-grid"><!-- renderCalendar() --></div>
+              </div>
+
+              <div class="legend">
+                <span class="legend-item"><i class="dot dot-scheduled"></i>Scheduled</span>
+                <span class="legend-item"><i class="dot dot-progress"></i>In Progress</span>
+                <span class="legend-item"><i class="dot dot-done"></i>Completed</span>
+                <span class="legend-item"><i class="dot dot-new"></i>New</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-location">
+            <div class="card-head">
+              <h2 class="card-title">Location</h2>
+              <span class="card-sub" id="loc-address">No job selected</span>
+            </div>
+            <div class="map-wrap" id="map-wrap"><!-- renderMap() --></div>
+            <div class="map-foot" id="map-foot"><!-- renderMap() --></div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- Load order matters: plain scripts, no modules, dependencies first. -->
+  <script src="js/config.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/parse.js"></script>
+  <script src="js/gmail.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/dragdrop.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
