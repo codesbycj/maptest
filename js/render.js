@@ -51,8 +51,6 @@ function ico(name, cls) {
 
 var GMAIL_LOGO = '<img class="gmail-logo" src="assets/gmail.webp" alt="" width="46" height="46">';
 
-/* Too many fills to survive the single-stroke .ico treatment above, so
-   this one carries its own. */
 var EMPTY_ILLUS =
   '<svg class="empty-illus" viewBox="0 0 168 124" aria-hidden="true">'
   + '<ellipse cx="88" cy="60" rx="46" ry="46" fill="#e8effc"/>'
@@ -232,9 +230,6 @@ function renderDetail() {
 
   var received = new Date(r.receivedAt);
 
-  /* The address is the one field that regularly fails to parse, so it is
-   * the one field that is always editable. A blank card would be a dead
-   * end; an input is a recovery path. */
   var showInput = r.needsReview || APP.editingAddress;
   var addressHtml = showInput
     ? '<input class="addr-input" id="addr-input" data-id="' + esc(r.id) + '"'
@@ -371,9 +366,6 @@ function renderCalendar() {
     }
   }
 
-  /* ---- booked jobs, layered over the slots in the same grid cells ----
-   * CSS grid lets items overlap, so there is no absolute-positioning
-   * arithmetic here: the event simply spans the rows it occupies. */
   var drawn = 0;
 
   booked.forEach(function (r) {
@@ -417,8 +409,6 @@ function renderCalendar() {
    Column 3b — location
    ========================================================================== */
 
-/* The drawn street grid plus a floating message card. Used for every
-   state that has no real embed to show. */
 function mapBackdrop(innerHtml) {
   return '<div class="map-placeholder">'
     +   '<div class="map-note-card">' + innerHtml + '</div>'

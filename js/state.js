@@ -30,16 +30,9 @@ function scheduledRequests() {
   return APP.requests.filter(function (r) { return r.status === 'scheduled' && r.booking; });
 }
 
-/* ---------- date helpers ----------
- * All of these work in local time on purpose. The app is single-timezone
- * (Africa/Lagos); the only place a timezone is stated explicitly is the
- * Calendar API call in js/calendar.js. */
-
 function startOfWeek(date) {
   var d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  /* getDay() is 0=Sun..6=Sat. The +7 before the modulo keeps the result
-   * positive when the week starts later in the week than today. */
   var start = CONFIG.WEEK_START_DAY;
   d.setDate(d.getDate() - ((d.getDay() - start + 7) % 7));
   return d;
@@ -80,7 +73,6 @@ function formatTime(date) {
   return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
 }
 
-/* "2m ago" / "3h ago" / "Tue" - the timestamp on an inbox card. */
 function relativeTime(iso) {
   var then = new Date(iso);
   var mins = Math.round((Date.now() - then.getTime()) / 60000);
@@ -93,12 +85,10 @@ function relativeTime(iso) {
   return then.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-/* Total slot rows in the calendar grid. 8am-6pm at 30min = 20. */
 function slotCount() {
   return (CONFIG.DAY_END_HOUR - CONFIG.DAY_START_HOUR) * (60 / CONFIG.SLOT_MINUTES);
 }
 
-/* Which grid row a time falls on. Row 1 is DAY_START_HOUR. */
 function slotIndex(date) {
   var mins = (date.getHours() - CONFIG.DAY_START_HOUR) * 60 + date.getMinutes();
   return Math.floor(mins / CONFIG.SLOT_MINUTES);

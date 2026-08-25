@@ -55,7 +55,6 @@ var Parse = (function () {
     return found ? found.value : '';
   }
 
-  /* 'John Doe <john@x.com>' -> { name, email } */
   function parseFrom(value) {
     var match = value.match(/^\s*"?([^"<]*)"?\s*<([^>]+)>/);
     if (match) {
@@ -65,11 +64,6 @@ var Parse = (function () {
     return { name: bare.split('@')[0] || 'Unknown sender', email: bare };
   }
 
-  /* Any format, any country. Rather than describing what a number looks
-   * like - which is where a country assumption creeps back in - take
-   * every run of digits and separators and keep the first one long
-   * enough to be a phone number. Separators exclude newlines on purpose,
-   * so a postcode cannot join up with the number on the line below. */
   var PHONE_RUN = /\+?\(?\d[\d ().-]{5,}\d/g;
   var PHONE_MIN_DIGITS = 7;
   var PHONE_MAX_DIGITS = 15;          // E.164 ceiling
@@ -135,9 +129,6 @@ var Parse = (function () {
     return { address: '', confident: false };
   }
 
-  /* Tidy only. Whatever the customer wrote is what gets searched -
-   * appending a city or country would silently relocate any address that
-   * did not already match this deployment's assumptions. */
   function normalise(addr) {
     return addr.replace(/\s+/g, ' ').replace(/[.,;]+$/, '').trim();
   }

@@ -42,8 +42,6 @@ var CalendarApi = (function () {
     });
   }
 
-  /* The rehydrate. Returns { gmailMessageId: {eventId, startISO, endISO} }
-   * for everything this app has booked in the visible range. */
   function bookedMessageIds() {
     if (!ready()) return Promise.resolve({});
 
@@ -56,8 +54,6 @@ var CalendarApi = (function () {
       timeMax: to.toISOString(),
       singleEvents: true,
       maxResults: 250,
-      /* Only events this app created carry this property, so we never
-       * trip over the user's own meetings. */
       privateExtendedProperty: 'status=scheduled'
     }).then(function (res) {
       var out = {};

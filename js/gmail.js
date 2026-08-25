@@ -30,8 +30,6 @@ var Gmail = (function () {
     });
   }
 
-  /* Both Google scripts are pulled in on demand rather than from
-   * index.html, so nothing hits the network until Gmail is needed. */
   function init() {
     if (scriptsLoaded) return Promise.resolve();
     if (!CONFIG.CLIENT_ID) {
@@ -85,13 +83,6 @@ var Gmail = (function () {
     });
   }
 
-  /* Fetching is two round trips, which surprises people.
-   *
-   *   1. users.messages.list returns IDs only - no subject, no body.
-   *   2. users.messages.get per ID returns the actual message.
-   *
-   * So filter hard at step 1 (CONFIG.GMAIL_QUERY) and you fetch ten
-   * messages instead of a thousand. */
   function loadRequests() {
     if (!gapiReady || !APP.connected) {
       return Promise.reject(new Error('Not connected to Gmail yet.'));
@@ -118,7 +109,6 @@ var Gmail = (function () {
           try {
             return Parse.toRequest(m);
           } catch (err) {
-            /* One malformed message must not take the whole inbox down. */
             console.warn('Skipped message ' + m.id + ':', err);
             return null;
           }

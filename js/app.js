@@ -1,7 +1,3 @@
-/* Boot sequence and every event handler. All handlers are delegated
- * from containers that render() leaves alone, because render() replaces
- * the markup inside them on every pass. */
-
 /* ==========================================================================
    Bookings — the one place a request changes from "waiting" to "booked"
    ========================================================================== */
@@ -21,8 +17,6 @@ var Bookings = (function () {
     try {
       localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(rows));
     } catch (err) {
-      /* Private browsing, or storage disabled. Not worth failing over -
-       * the session still works, it just will not survive a refresh. */
       console.warn('Could not save bookings:', err);
     }
   }
@@ -74,8 +68,6 @@ var Bookings = (function () {
     var r = getRequest(id);
     if (!r) return;
 
-    /* Guard, not a crash. A job with no address cannot be routed to, so
-     * send the user to the field that fixes it. */
     if (!r.address) {
       APP.selectedId = r.id;
       APP.editingAddress = true;
@@ -104,8 +96,6 @@ var Bookings = (function () {
     render();
     toast(r.subject + ' booked for ' + formatTime(start) + '.');
 
-    /* Sprint 7: mirror it into the real calendar. Fire and forget - the
-     * UI has already committed, and a failure only costs the eventId. */
     if (APP.connected && typeof CalendarApi !== 'undefined') {
       CalendarApi.createEvent(r).then(function (eventId) {
         if (!eventId) return;
@@ -176,8 +166,6 @@ function loadRequests() {
    Wiring
    ========================================================================== */
 
-/* Must run inside a click handler - popup blockers kill
- * requestAccessToken() otherwise. Never call it on page load. */
 function connectGmail() {
   if (APP.connected) return loadRequests();
 
