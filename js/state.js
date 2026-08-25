@@ -38,9 +38,10 @@ function scheduledRequests() {
 function startOfWeek(date) {
   var d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  var day = d.getDay();               // 0=Sun .. 6=Sat
-  var diff = day === 0 ? -6 : 1 - day; // shift back to Monday
-  d.setDate(d.getDate() + diff);
+  /* getDay() is 0=Sun..6=Sat. The +7 before the modulo keeps the result
+   * positive when the week starts later in the week than today. */
+  var start = CONFIG.WEEK_START_DAY;
+  d.setDate(d.getDate() - ((d.getDay() - start + 7) % 7));
   return d;
 }
 

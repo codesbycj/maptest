@@ -1,15 +1,6 @@
-/* Turns a raw Gmail message into the RepairRequest shape in js/state.js.
- *
- * The governing rule: never throw, never return a blank card. Real
- * inboxes are messy, and roughly a third of genuine emails will not
- * yield a clean address. Those get needsReview: true and an editable
- * field, which is a recovery path rather than a dead end. */
 
 var Parse = (function () {
 
-  /* Gmail encodes bodies as base64url. The browser has no Buffer, and
-   * plain atob() mangles anything non-ASCII, so decode to bytes first
-   * and let TextDecoder handle the UTF-8. */
   function decodeB64Url(data) {
     if (!data) return '';
     try {
@@ -74,22 +65,43 @@ var Parse = (function () {
     return { name: bare.split('@')[0] || 'Unknown sender', email: bare };
   }
 
-  var PHONE_RE = /(?:\+234|0)[789]\d{1}[\s-]?\d{3}[\s-]?\d{4}/;
+  /* Any format, any country. Rather than describing what a number looks
+   * like - which is where a country assumption creeps back in - take
+   * every run of digits and separators and keep the first one long
+   * enough to be a phone number. Separators exclude newlines on purpose,
+   * so a postcode cannot join up with the number on the line below. */
+  var PHONE_RUN = /\+?\(?\d[\d ().-]{5,}\d/g;
+  var PHONE_MIN_DIGITS = 7;
+  var PHONE_MAX_DIGITS = 15;          // E.164 ceiling
+  var LOOKS_LIKE_DATE = /^\d{1,2}[.-]\d{1,2}[.-]\d{2,4}$/;
 
   function parsePhone(body) {
-    var m = body.match(PHONE_RE);
-    return m ? m[0].trim() : '';
+    var runs = body.match(PHONE_RUN) || [];
+
+    for (var i = 0; i < runs.length; i++) {
+      var raw = runs[i].trim();
+      var digits = raw.replace(/\D/g, '').length;
+      if (digits < PHONE_MIN_DIGITS || digits > PHONE_MAX_DIGITS) continue;
+      if (LOOKS_LIKE_DATE.test(raw)) continue;
+      return raw;
+    }
+
+    return '';
   }
 
-  /* Two passes, most reliable first:
-   *   1. an explicit "Address:" / "Location:" line
-   *   2. any line carrying a Nigerian street suffix
-   * Anything else is a miss, and a miss is flagged, not invented. */
-  var STREET_RE = /\b(street|road|way|close|avenue|crescent|drive|lane|estate|boulevard|expressway)\b/i;
-  var AREAS = [
-    'Lekki', 'Ikeja', 'Yaba', 'Surulere', 'Victoria Island', 'Ikoyi', 'Ajah',
-    'Gbagada', 'Maryland', 'Apapa', 'Festac', 'Magodo', 'Ogba', 'Oshodi', 'Ketu'
-  ];
+  /* Area names come from config, so they cannot be trusted to be plain
+     words - escape anything the regex engine would read as syntax. */
+  function escapeRe(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+
+  var STREET_RE = new RegExp('\\b('
+    + 'street|road|way|close|avenue|crescent|drive|lane|estate|boulevard'
+    + '|expressway|court|place|circle|terrace|parkway|highway|trail|plaza'
+    + '|square|loop'
+    + '|st|rd|ave|blvd|dr|ln|ct|pl|pkwy|hwy|ter|cir|trl|sq'
+    + ')\\b', 'i');
 
   function parseAddress(body) {
     var lines = body.split(/\r?\n/);
@@ -112,23 +124,22 @@ var Parse = (function () {
       }
     }
 
-    /* Last resort: a recognisable Lagos area mentioned anywhere. Enough
-     * to drop a pin on, not enough to trust - flag it for a human. */
-    for (i = 0; i < AREAS.length; i++) {
-      var re = new RegExp('\\b' + AREAS[i] + '\\b', 'i');
+    var areas = CONFIG.AREAS || [];
+    for (i = 0; i < areas.length; i++) {
+      var re = new RegExp('\\b' + escapeRe(areas[i]) + '\\b', 'i');
       if (re.test(body)) {
-        return { address: normalise(AREAS[i]), confident: false };
+        return { address: normalise(areas[i]), confident: false };
       }
     }
 
     return { address: '', confident: false };
   }
 
+  /* Tidy only. Whatever the customer wrote is what gets searched -
+   * appending a city or country would silently relocate any address that
+   * did not already match this deployment's assumptions. */
   function normalise(addr) {
-    var out = addr.replace(/\s+/g, ' ').replace(/[.,;]+$/, '').trim();
-    if (!/lagos/i.test(out)) out += ', Lagos';
-    if (!/nigeria/i.test(out)) out += ', Nigeria';
-    return out;
+    return addr.replace(/\s+/g, ' ').replace(/[.,;]+$/, '').trim();
   }
 
   /* Short label for the inbox card - first two comma-separated parts. */

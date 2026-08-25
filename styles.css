@@ -319,13 +319,12 @@ button { font: inherit; }
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 13px 13px 13px 15px;
-  cursor: grab;
+  cursor: pointer;
   background: var(--surface);
   transition: border-color .12s ease, box-shadow .12s ease;
 }
 
 .req-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
-.req-card:active { cursor: grabbing; }
 
 .req-card.is-selected {
   border-color: var(--brand-600);
@@ -333,9 +332,7 @@ button { font: inherit; }
   box-shadow: 0 0 0 1px var(--brand-600);
 }
 
-/* The card currently being dragged, and the card waiting for a slot in
-   the click-to-place fallback. */
-.req-card.is-dragging { opacity: .45; }
+/* Armed by Schedule Repair, waiting for a slot to be picked. */
 .req-card.is-pending {
   border-color: var(--brand-600);
   border-style: dashed;
@@ -806,14 +803,12 @@ button { font: inherit; }
 .slot { border-top: 1px solid var(--border); }
 .slot.is-half { border-top-color: transparent; }
 
-.slot.is-over {
+/* Highlight every free slot while a request waits to be placed. */
+.cal-grid.is-placing .slot:not(.is-taken) { background: var(--brand-tint); cursor: pointer; }
+.cal-grid.is-placing .slot:not(.is-taken):hover {
   background: var(--brand-tint-2);
   box-shadow: inset 0 0 0 2px var(--brand-600);
 }
-
-/* Highlight every free slot while a card waits to be placed. */
-.cal-grid.is-placing .slot:not(.is-taken) { background: var(--brand-tint); cursor: pointer; }
-.cal-grid.is-placing .slot:not(.is-taken):hover { background: var(--brand-tint-2); }
 
 /* Booked jobs sit in the same grid cells as the slots, one layer up.
    CSS grid allows items to overlap, so no absolute positioning maths. */

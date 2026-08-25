@@ -5,7 +5,7 @@
  * is instant, and it removes the whole class of bugs where the screen
  * and the data quietly disagree. Because the markup is thrown away on
  * every pass, all event handling is delegated from the containers in
- * js/app.js and js/dragdrop.js - never bound to these elements. */
+ * js/app.js and js/place.js - never bound to these elements. */
 
 /* Never interpolate user text into HTML without this. Email bodies are
  * attacker-controlled once real Gmail is switched on. */
@@ -163,7 +163,7 @@ function renderInbox() {
     return '<article class="req-card'
       + (r.id === APP.selectedId ? ' is-selected' : '')
       + (r.id === APP.pendingDropId ? ' is-pending' : '')
-      + '" draggable="true" data-id="' + esc(r.id) + '" data-status="' + esc(r.status) + '">'
+      + '" data-id="' + esc(r.id) + '" data-status="' + esc(r.status) + '">'
       + '<div class="req-top">'
       +   '<h3 class="req-subject">' + esc(r.subject) + '</h3>'
       +   '<span class="req-time">' + esc(relativeTime(r.receivedAt)) + '</span>'

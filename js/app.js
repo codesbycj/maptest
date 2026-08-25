@@ -297,7 +297,7 @@ function boot() {
   wireCalendarNav();
   wireInbox();
   wireDetail();
-  DragDrop.init();
+  Place.init();
 
   render();
 
