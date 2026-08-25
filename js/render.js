@@ -49,6 +49,31 @@ function ico(name, cls) {
   return '<svg viewBox="0 0 24 24" class="ico ' + (cls || '') + '">' + ICONS[name] + '</svg>';
 }
 
+var GMAIL_LOGO = '<img class="gmail-logo" src="assets/gmail.webp" alt="" width="46" height="46">';
+
+/* Too many fills to survive the single-stroke .ico treatment above, so
+   this one carries its own. */
+var EMPTY_ILLUS =
+  '<svg class="empty-illus" viewBox="0 0 168 124" aria-hidden="true">'
+  + '<ellipse cx="88" cy="60" rx="46" ry="46" fill="#e8effc"/>'
+  + '<path d="M56 46h64a5 5 0 0 1 5 5v34a5 5 0 0 1-5 5H56a5 5 0 0 1-5-5V51a5 5 0 0 1 5-5z" fill="#c7d9f7"/>'
+  + '<path d="M51 51l37 25 37-25v-1a5 5 0 0 0-5-4H56a5 5 0 0 0-5 4z" fill="#dbe6fb"/>'
+  + '<path d="M63 34h50a4 4 0 0 1 4 4v27l-29 20-29-20V38a4 4 0 0 1 4-4z" fill="#fff"/>'
+  + '<path d="M74 47h28M74 56h20" stroke="#93b4f5" stroke-width="3" stroke-linecap="round"/>'
+  + '<path d="M51 55l37 25 37-25v30a5 5 0 0 1-5 5H56a5 5 0 0 1-5-5z" fill="#b9d0f5"/>'
+  + '<g fill="#c7d9f7">'
+  +   '<path d="M32 30l1.8 4.7L38.5 36l-4.7 1.8L32 42l-1.8-4.2L25.5 36l4.7-1.3z"/>'
+  +   '<path d="M139 24l1.4 3.6 3.6 1.4-3.6 1.4-1.4 3.6-1.4-3.6-3.6-1.4 3.6-1.4z"/>'
+  +   '<path d="M31 74l1.2 3 3 1.2-3 1.2-1.2 3-1.2-3-3-1.2 3-1.2z"/>'
+  +   '<circle cx="146" cy="62" r="3"/><circle cx="122" cy="18" r="2.5"/>'
+  + '</g>'
+  + '</svg>';
+
+function lockIco() {
+  return '<svg viewBox="0 0 24 24" class="ico"><rect x="3" y="11" width="18" height="11" rx="2"/>'
+    + '<path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+}
+
 /* ==========================================================================
    Topbar
    ========================================================================== */
@@ -100,9 +125,18 @@ function renderInbox() {
     var head, note;
 
     if (!APP.connected) {
-      head = 'Not connected';
-      note = 'Click Connect Gmail to load your repair requests.';
-    } else if (APP.filterUrgent) {
+      host.innerHTML = '<div class="connect-card">'
+        + GMAIL_LOGO
+        + '<h3>Connect your Gmail</h3>'
+        + '<p>View and manage repair requests from your Gmail inbox.</p>'
+        + '<button class="btn btn-primary block" data-act="connect">'
+        +   lockIco() + 'Connect Gmail Account</button>'
+        + '<span class="connect-note">' + lockIco() + 'We only read your emails.</span>'
+        + '</div>';
+      return;
+    }
+
+    if (APP.filterUrgent) {
       head = 'Nothing urgent';
       note = 'No urgent requests right now. Clear the filter to see the rest.';
     } else if (APP.requests.length) {
@@ -151,15 +185,48 @@ function field(iconName, label, valueHtml) {
     + '<span class="field-value">' + valueHtml + '</span></div>';
 }
 
+/* An illustration of the input, not of the app's data - it never enters
+   APP.requests and nothing can be scheduled from it. */
+function samplePreview() {
+  var body = 'Hello,\n'
+    + 'My AC has stopped cooling since yesterday. Please\n'
+    + 'send someone to check and fix it.\n\n'
+    + 'Address: 15 Admiralty Way, Lekki Phase 1, Lagos\n\n'
+    + 'Preferred time: Anytime tomorrow\n'
+    + 'Phone: 0803 123 4567\n\n'
+    + 'Thank you.';
+
+  return '<div class="sample">'
+    + '<div class="sample-head">'
+    +   '<strong>Sample Request Preview</strong>'
+    +   '<span class="sample-badge">Sample</span>'
+    + '</div>'
+    + '<dl class="sample-rows">'
+    +   '<div class="sample-row"><dt>From</dt><dd>John Doe &lt;johndoe@gmail.com&gt;</dd></div>'
+    +   '<div class="sample-row"><dt>Subject</dt><dd>AC not cooling</dd></div>'
+    +   '<div class="sample-row"><dt>Received</dt><dd>Today, 10:24 AM</dd></div>'
+    + '</dl>'
+    + '<div class="sample-body">' + esc(body) + '</div>'
+    + '<div class="sample-foot">' + lockIco()
+    +   '<button class="sample-link" data-act="connect">Connect Gmail to see real requests</button>'
+    + '</div>'
+    + '</div>';
+}
+
 function renderDetail() {
   var host = document.getElementById('detail');
   var r = getSelected();
 
   if (!r) {
-    host.innerHTML = '<div class="empty">' + ico('mail')
-      + '<strong>No request selected</strong>'
-      + '<span>Pick a request on the left to see the details Gmail gave us.</span>'
-      + '</div>';
+    host.innerHTML = '<div class="detail-empty">'
+      +   EMPTY_ILLUS
+      +   '<h2>No request selected</h2>'
+      +   '<p>Select a repair request from the list to view details, '
+      +   'extract information and schedule.</p>'
+      + '</div>'
+      /* The sample is a worked example of what parsing produces, shown
+       * only while there is no real inbox to show instead. */
+      + (APP.connected ? '' : samplePreview());
     return;
   }
 
@@ -307,6 +374,8 @@ function renderCalendar() {
   /* ---- booked jobs, layered over the slots in the same grid cells ----
    * CSS grid lets items overlap, so there is no absolute-positioning
    * arithmetic here: the event simply spans the rows it occupies. */
+  var drawn = 0;
+
   booked.forEach(function (r) {
     var start = new Date(r.booking.startISO);
     var end = new Date(r.booking.endISO);
@@ -328,7 +397,17 @@ function renderCalendar() {
       + '<div class="event-title">' + esc(r.subject) + '</div>'
       + '<div class="event-where">' + esc(r.area) + '</div>'
       + '</div>';
+    drawn++;
   });
+
+  /* Overlaid rather than swapped in, so the slots underneath still take
+   * a drop while it is showing. */
+  if (!drawn) {
+    html += '<div class="cal-empty">' + ico('cal')
+      + '<strong>No jobs scheduled</strong>'
+      + '<span>Schedule a repair to see it here</span>'
+      + '</div>';
+  }
 
   grid.innerHTML = html;
   grid.classList.toggle('is-placing', Boolean(APP.pendingDropId));
@@ -338,6 +417,20 @@ function renderCalendar() {
    Column 3b — location
    ========================================================================== */
 
+/* The drawn street grid plus a floating message card. Used for every
+   state that has no real embed to show. */
+function mapBackdrop(innerHtml) {
+  return '<div class="map-placeholder">'
+    +   '<div class="map-note-card">' + innerHtml + '</div>'
+    + '</div>'
+    + '<div class="map-ctrls" aria-hidden="true">'
+    +   '<span class="map-ctrl"><svg viewBox="0 0 24 24" class="ico"><path d="M12 5v14M5 12h14"/></svg></span>'
+    +   '<span class="map-ctrl"><svg viewBox="0 0 24 24" class="ico"><path d="M5 12h14"/></svg></span>'
+    +   '<span class="map-ctrl"><svg viewBox="0 0 24 24" class="ico"><circle cx="12" cy="12" r="3"/>'
+    +     '<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span>'
+    + '</div>';
+}
+
 function renderMap() {
   var wrap = document.getElementById('map-wrap');
   var foot = document.getElementById('map-foot');
@@ -346,12 +439,10 @@ function renderMap() {
 
   if (!r || !r.address) {
     label.textContent = r ? 'No address on this request' : 'No job selected';
-    wrap.innerHTML = '<div class="map-placeholder">' + ico('pin')
-      + '<strong>' + (r ? 'Address missing' : 'Nothing to show') + '</strong>'
-      + '<span>' + (r
-          ? 'Add an address in Extracted Details and the map will fill in.'
-          : 'Select a request to see where the technician is going.') + '</span>'
-      + '</div>';
+    wrap.innerHTML = mapBackdrop(
+      r ? '<strong>Address missing</strong>'
+          + '<span>Add an address in Extracted Details and the map will fill in.</span>'
+        : '<span>Select a job to view location<br>and get directions.</span>');
     foot.innerHTML = '';
     return;
   }
@@ -365,11 +456,10 @@ function renderMap() {
   } else {
     /* No key yet. Say so plainly rather than rendering an iframe that
      * silently shows Google's grey error tile. */
-    wrap.innerHTML = '<div class="map-placeholder">' + ico('pin')
+    wrap.innerHTML = mapBackdrop(ico('pin')
       + '<strong>' + esc(r.area || r.address) + '</strong>'
-      + '<span>Add a Maps Embed API key to <code>CONFIG.MAPS_KEY</code> to render the map here.</span>'
-      + '<span>The directions button below works without one.</span>'
-      + '</div>';
+      + '<span>Set <code>CONFIG.MAPS_KEY</code> to render the map here. '
+      + 'The directions button works without one.</span>');
   }
 
   foot.innerHTML =

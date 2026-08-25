@@ -176,25 +176,21 @@ function loadRequests() {
    Wiring
    ========================================================================== */
 
-function wireTopbar() {
-  document.getElementById('btn-refresh').addEventListener('click', function () {
-    loadRequests();
-  });
+/* Must run inside a click handler - popup blockers kill
+ * requestAccessToken() otherwise. Never call it on page load. */
+function connectGmail() {
+  if (APP.connected) return loadRequests();
 
-  document.getElementById('btn-sync').addEventListener('click', function () {
-    /* Must be called straight from a click handler - popup blockers
-     * kill requestAccessToken() otherwise. Never call it on page load. */
-    if (!APP.connected) {
-      Gmail.connect().then(loadRequests).catch(function (err) {
-        console.error(err);
-        APP.error = err;
-        render();
-        toast('Could not connect to Gmail.');
-      });
-    } else {
-      loadRequests();
-    }
+  return Gmail.connect().then(loadRequests).catch(function (err) {
+    console.error(err);
+    APP.error = err;
+    render();
+    toast('Could not connect to Gmail.');
   });
+}
+
+function wireTopbar() {
+  document.getElementById('btn-sync').addEventListener('click', connectGmail);
 
   document.getElementById('btn-filter').addEventListener('click', function (e) {
     APP.filterUrgent = !APP.filterUrgent;
@@ -222,6 +218,8 @@ function wireCalendarNav() {
 
 function wireInbox() {
   document.getElementById('inbox-list').addEventListener('click', function (e) {
+    if (e.target.closest('[data-act="connect"]')) return connectGmail();
+
     var card = e.target.closest('.req-card');
     if (!card) return;
     APP.selectedId = card.dataset.id;
@@ -242,7 +240,10 @@ function wireDetail() {
     var act = btn.dataset.act;
     var r = getRequest(btn.dataset.id);
 
-    if (act === 'clear-selection') {
+    if (act === 'connect') {
+      connectGmail();
+
+    } else if (act === 'clear-selection') {
       APP.selectedId = null;
       APP.editingAddress = false;
       render();
@@ -289,12 +290,24 @@ function wireDetail() {
 }
 
 /* ==========================================================================
+   Theme
+   ========================================================================== */
+
+/* No switch in the UI - the app follows whatever the OS is set to. */
+function initTheme() {
+  var prefersDark = window.matchMedia
+    && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+}
+
+/* ==========================================================================
    Boot
    ========================================================================== */
 
 function boot() {
   APP.weekStart = startOfWeek(new Date());
 
+  initTheme();
   wireTopbar();
   wireCalendarNav();
   wireInbox();
