@@ -257,11 +257,11 @@ function wireDetail() {
       render();
 
     } else if (act === 'place' && r) {
-      /* Click-to-place: arm the card, light up the grid, wait for a
-       * slot click. js/dragdrop.js completes the other half. */
       APP.pendingDropId = r.id;
       render();
-      toast('Now click a slot on the calendar.');
+      var cal = document.querySelector('.card-schedule');
+      if (cal) cal.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      toast('Now pick a slot on the calendar.');
 
     } else if (act === 'unschedule' && r) {
       Bookings.unschedule(r.id);
@@ -271,9 +271,6 @@ function wireDetail() {
     }
   });
 
-  /* Address recovery. Writes straight into the request, clears the
-   * needsReview flag, and refreshes the map without a full re-render
-   * (which would blow away the input the user is typing in). */
   detail.addEventListener('input', function (e) {
     if (!e.target.matches('.addr-input')) return;
     var r = getRequest(e.target.dataset.id);
@@ -290,24 +287,12 @@ function wireDetail() {
 }
 
 /* ==========================================================================
-   Theme
-   ========================================================================== */
-
-/* No switch in the UI - the app follows whatever the OS is set to. */
-function initTheme() {
-  var prefersDark = window.matchMedia
-    && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-}
-
-/* ==========================================================================
    Boot
    ========================================================================== */
 
 function boot() {
   APP.weekStart = startOfWeek(new Date());
 
-  initTheme();
   wireTopbar();
   wireCalendarNav();
   wireInbox();
@@ -316,8 +301,6 @@ function boot() {
 
   render();
 
-  /* Do not auto-open the consent popup - browsers block it unless it
-   * comes from a real click. Wait for the Connect button. */
   Gmail.init().catch(function (err) {
     console.error(err);
     APP.error = err;

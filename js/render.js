@@ -454,12 +454,9 @@ function renderMap() {
       + ' loading="lazy" referrerpolicy="no-referrer-when-downgrade"'
       + ' src="' + esc(MapPanel.embedSrc(r.address)) + '"></iframe>';
   } else {
-    /* No key yet. Say so plainly rather than rendering an iframe that
-     * silently shows Google's grey error tile. */
     wrap.innerHTML = mapBackdrop(ico('pin')
       + '<strong>' + esc(r.area || r.address) + '</strong>'
-      + '<span>Set <code>CONFIG.MAPS_KEY</code> to render the map here. '
-      + 'The directions button works without one.</span>');
+      + '<span>Map preview unavailable. Use the directions button below.</span>');
   }
 
   foot.innerHTML =

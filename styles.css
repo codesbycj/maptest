@@ -45,30 +45,6 @@
   --gutter-w:       52px;   /* the time-label column */
 }
 
-/* Dark theme is a straight palette swap - every rule below reads these
-   variables rather than naming a colour, so nothing else has to change. */
-[data-theme="dark"] {
-  --page-bg:        #0b1220;
-  --surface:        #111a2e;
-  --surface-2:      #16203a;
-  --border:         #22304d;
-  --border-strong:  #33415e;
-
-  --text:           #e8eefc;
-  --text-muted:     #93a3bd;
-  --text-faint:     #6b7c99;
-
-  --brand-tint:     #172554;
-  --brand-tint-2:   #1e3a8a;
-  --green-tint:     #052e1a;
-  --amber-tint:     #3a2708;
-  --red-tint:       #3f1213;
-  --purple-tint:    #2b1a54;
-
-  --shadow-sm:      0 1px 2px rgba(0, 0, 0, .35);
-  --shadow:         0 4px 16px rgba(0, 0, 0, .35);
-}
-
 * { box-sizing: border-box; }
 
 html { height: 100%; }
@@ -301,6 +277,7 @@ button { font: inherit; }
 .card-title { font-size: 15.5px; font-weight: 600; letter-spacing: -.01em; }
 
 .card-sub {
+  flex: 1;
   font-size: 12.5px;
   color: var(--text-muted);
   text-align: right;
@@ -972,16 +949,6 @@ button { font: inherit; }
     #e9eef5;
 }
 
-[data-theme="dark"] .map-placeholder {
-  background:
-    linear-gradient(115deg, transparent 46%, #1e3a5f 46% 54%, transparent 54%),
-    radial-gradient(closest-side, #163324 92%, transparent) 78% 22% / 32% 34% no-repeat,
-    radial-gradient(closest-side, #163324 92%, transparent) 12% 82% / 26% 26% no-repeat,
-    repeating-linear-gradient(0deg,  #1b2740 0 3px, transparent 3px 62px),
-    repeating-linear-gradient(90deg, #1b2740 0 3px, transparent 3px 78px),
-    #131d33;
-}
-
 /* The message floats on the map rather than replacing it. */
 .map-note-card {
   background: var(--surface);
@@ -1143,6 +1110,9 @@ button { font: inherit; }
   .empty-illus { width: 132px; height: 98px; }
   .sample { margin: 0 14px 14px; }
   .detail-body { padding: 16px; }
+
+  .detail-foot { flex-direction: column; padding: 14px 16px; }
+  .detail-foot .btn { width: 100%; flex: none; }
   .cal, .map-wrap, .map-foot { margin-left: 0; margin-right: 0; }
   .cal { padding: 0 12px; }
   .map-wrap { margin: 10px 12px 0; }

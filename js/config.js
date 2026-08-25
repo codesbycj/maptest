@@ -6,6 +6,8 @@ var CONFIG = {
     'https://www.googleapis.com/auth/calendar.events'
   ].join(' '),
 
+  MAPS_KEY: 'AIzaSyCEByAd8Wr6cYOr2bn4PSQUWXNPdkI1bqs',
+
   GMAIL_QUERY: 'newer_than:14d subject:(repair OR service OR fault OR broken)',
   TIMEZONE: 'Africa/Lagos',
   DAY_START_HOUR: 8,
